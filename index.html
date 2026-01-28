@@ -19,7 +19,11 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #1e293b;
-            overflow-x: hidden;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
         }
 
         .glass-panel {
@@ -30,11 +34,12 @@
         }
 
         .number-card {
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            user-select: none;
         }
 
         .number-card:hover {
-            transform: translateY(-5px) scale(1.02);
+            transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
@@ -42,7 +47,7 @@
             background: var(--primary);
             color: white;
             border-color: transparent;
-            transform: scale(1.08);
+            transform: scale(1.05);
             z-index: 10;
         }
 
@@ -50,186 +55,211 @@
             background: #10b981;
             color: white;
             border-color: transparent;
-            animation: celebrate 0.6s ease;
+            animation: celebrate 0.5s ease;
         }
 
         .number-card.wrong {
             background: #f43f5e;
             color: white;
             border-color: transparent;
-            animation: shake 0.5s ease-in-out;
+            animation: shake 0.4s ease-in-out;
         }
 
         @keyframes celebrate {
-            0% { transform: scale(1); rotate: 0deg; }
-            25% { transform: scale(1.2); rotate: 5deg; }
-            50% { transform: scale(1.2); rotate: -5deg; }
-            100% { transform: scale(1); rotate: 0deg; }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
         }
 
-        /* 自定義滑桿樣式 */
+        /* 自定義滑桿 */
         input[type=range] { -webkit-appearance: none; background: transparent; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%; background: var(--primary); margin-top: -7px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: var(--primary); margin-top: -6px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-        .designer-link {
-            transition: all 0.3s ease;
-            position: relative;
+        .custom-input {
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s;
         }
-        .designer-link:hover {
-            color: var(--primary);
-            transform: translateY(-2px);
+        .custom-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
-        .designer-link::after {
-            content: '';
-            position: absolute;
-            width: 0; height: 2px; bottom: -2px; left: 0;
-            background-color: var(--primary);
-            transition: width 0.3s ease;
-        }
-        .designer-link:hover::after { width: 100%; }
+        
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* 滾動條美化 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
+<body>
 
-    <!-- 背景裝飾圓形 -->
-    <div class="fixed top-[-5%] left-[-5%] w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-    <div class="fixed bottom-[-5%] right-[-5%] w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+    <!-- 背景裝飾 -->
+    <div class="fixed top-[-5%] left-[-5%] w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 pointer-events-none"></div>
+    <div class="fixed bottom-[-5%] right-[-5%] w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 pointer-events-none"></div>
 
     <!-- 初始設定畫面 -->
-    <div id="setup-screen" class="glass-panel p-10 rounded-[2.5rem] max-w-lg w-full z-10">
-        <div class="text-center mb-10">
+    <div id="setup-screen" class="glass-panel p-8 rounded-[2.5rem] max-w-lg w-full z-10">
+        <div class="text-center mb-8">
             <h1 class="text-4xl font-black text-gray-800 tracking-tight mb-2">數字對對碰</h1>
             <p class="text-gray-400 font-bold uppercase tracking-widest text-xs">Visual Focus Challenge</p>
         </div>
         
         <div class="space-y-6">
             <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2 bg-white/50 p-4 rounded-2xl">
-                    <label class="text-xs font-black text-indigo-600 uppercase tracking-wider">總題目數</label>
-                    <div class="flex items-center justify-between">
-                        <span id="total-rounds-display" class="text-2xl font-black text-gray-800">5</span>
-                        <input type="range" id="total-rounds" min="1" max="20" step="1" value="5" class="w-24">
+                <div class="space-y-3 bg-white/50 p-4 rounded-2xl border border-white/50">
+                    <label class="text-xs font-black text-indigo-600 uppercase tracking-wider block">總題目數</label>
+                    <div class="flex items-center gap-3">
+                        <input type="number" id="total-rounds-input" value="10" min="1" max="50" class="custom-input w-16 text-center py-1 rounded-lg font-bold text-gray-800 outline-none">
+                        <input type="range" id="total-rounds-slider" min="1" max="50" step="1" value="10" class="flex-1">
                     </div>
                 </div>
-                <div class="space-y-2 bg-white/50 p-4 rounded-2xl">
-                    <label class="text-xs font-black text-indigo-600 uppercase tracking-wider">單題數量</label>
-                    <div class="flex items-center justify-between">
-                        <span id="count-display" class="text-2xl font-black text-gray-800">30</span>
-                        <input type="range" id="item-count" min="10" max="100" step="2" value="30" class="w-24">
+                <div class="space-y-3 bg-white/50 p-4 rounded-2xl border border-white/50">
+                    <label class="text-xs font-black text-indigo-600 uppercase tracking-wider block">單題數量</label>
+                    <div class="flex items-center gap-3">
+                        <input type="number" id="item-count-input" value="10" min="4" max="100" class="custom-input w-16 text-center py-1 rounded-lg font-bold text-gray-800 outline-none">
+                        <input type="range" id="item-count-slider" min="4" max="100" step="2" value="10" class="flex-1">
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white/50 p-4 rounded-2xl space-y-4">
-                <label class="text-xs font-black text-indigo-600 uppercase tracking-wider">數字範圍設定</label>
+            <div class="bg-white/50 p-4 rounded-2xl space-y-4 border border-white/50">
+                <label class="text-xs font-black text-indigo-600 uppercase tracking-wider block">數字範圍設定</label>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="min-range" value="1" class="w-full bg-white rounded-xl px-4 py-3 outline-none transition-all font-bold border-2 border-transparent focus:border-indigo-400">
-                    <input type="number" id="max-range" value="500" class="w-full bg-white rounded-xl px-4 py-3 outline-none transition-all font-bold border-2 border-transparent focus:border-indigo-400">
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold uppercase">Min</span>
+                        <input type="number" id="min-range" value="1" class="w-full bg-white rounded-xl pl-10 pr-4 py-3 outline-none custom-input font-bold">
+                    </div>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold uppercase">Max</span>
+                        <input type="number" id="max-range" value="30" class="w-full bg-white rounded-xl pl-10 pr-4 py-3 outline-none custom-input font-bold">
+                    </div>
                 </div>
-                <p id="range-error" class="text-red-500 text-xs text-center hidden font-bold">⚠️ 區間範圍不足以容納所有數字！</p>
+                <p id="range-error" class="text-red-500 text-xs text-center hidden font-bold">⚠️ 區間範圍不足！</p>
             </div>
 
-            <div class="bg-white/50 p-4 rounded-2xl space-y-3">
+            <div class="bg-white/50 p-4 rounded-2xl space-y-3 border border-white/50">
                 <div class="flex justify-between items-center">
                     <label class="text-xs font-black text-indigo-600 uppercase tracking-wider">單題限時</label>
-                    <span id="time-display" class="text-xl font-black text-gray-800">10s</span>
+                    <span id="time-display" class="text-xl font-black text-gray-800">30s</span>
                 </div>
-                <input type="range" id="game-time" min="3" max="60" step="1" value="10" class="w-full">
+                <input type="range" id="game-time" min="3" max="120" step="1" value="30" class="w-full">
             </div>
 
-            <button id="start-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-indigo-500/50 text-white font-black py-5 rounded-2xl text-xl transition-all shadow-xl active:scale-95">
-                開始挑戰
-            </button>
+            <div class="grid grid-cols-2 gap-4">
+                <button id="start-btn" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black py-4 rounded-2xl text-lg transition-all shadow-xl active:scale-95 hover:brightness-110">
+                    開始挑戰
+                </button>
+                <button id="view-history-btn" class="bg-white/80 text-gray-600 font-black py-4 rounded-2xl text-lg transition-all border border-gray-100 shadow-sm active:scale-95 flex items-center justify-center gap-2">
+                    <span>📜</span> 歷史紀錄
+                </button>
+            </div>
 
-            <!-- 鄭凱文設計師連結 -->
             <div class="text-center pt-4 border-t border-gray-100">
-                <a href="https://www.facebook.com/kevin.pptgame" target="_blank" class="designer-link text-gray-400 font-bold text-sm">
-                    設計：簡報遊戲設計師 - 鄭凱文
+                <a href="https://www.facebook.com/mpotkevin" target="_blank" class="text-gray-400 font-bold text-sm hover:text-indigo-600 transition-colors">
+                    設計：職能治療師 - 鄭凱文
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 歷史紀錄彈窗 -->
+    <div id="history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-md rounded-[2.5rem] p-8 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-gray-800">歷史成績</h3>
+                <button id="close-history-btn" class="text-gray-400 hover:text-gray-600 text-3xl font-light">&times;</button>
+            </div>
+            <div id="history-list" class="flex-1 overflow-y-auto space-y-3 pr-2"></div>
+            <button id="clear-history-btn" class="mt-6 text-xs text-red-400 font-bold uppercase tracking-widest text-center w-full">清空紀錄</button>
+        </div>
+    </div>
+
+    <!-- 中止確認彈窗 -->
+    <div id="abort-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/30 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-xs rounded-[2rem] p-8 text-center">
+            <div class="text-5xl mb-4">🛑</div>
+            <h3 class="text-xl font-black text-gray-800 mb-2">確定要中止嗎？</h3>
+            <p class="text-gray-500 text-sm mb-6 font-bold">目前的進度將不會被儲存</p>
+            <div class="grid grid-cols-2 gap-3">
+                <button id="confirm-abort-btn" class="bg-red-500 text-white font-black py-3 rounded-xl active:scale-95 shadow-lg shadow-red-100">中止</button>
+                <button id="cancel-abort-btn" class="bg-gray-100 text-gray-600 font-black py-3 rounded-xl active:scale-95">取消</button>
             </div>
         </div>
     </div>
 
     <!-- 遊戲主畫面 -->
     <div id="game-screen" class="hidden w-full max-w-6xl flex flex-col items-center z-10">
-        <div class="w-full flex flex-col md:flex-row justify-between items-center mb-8 px-8 py-6 glass-panel rounded-[2rem] gap-6">
+        <div class="w-full flex flex-col md:flex-row justify-between items-center mb-8 px-8 py-4 glass-panel rounded-[2rem] gap-6">
             <div class="flex items-center gap-5">
-                <div class="bg-indigo-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg shadow-indigo-200" id="round-num">1</div>
+                <div class="bg-indigo-600 text-white w-12 h-12 rounded-xl flex items-center justify-center font-black text-2xl shadow-lg shadow-indigo-200" id="round-num">1</div>
                 <div>
-                    <h2 id="round-indicator" class="text-2xl font-black text-gray-800">第 1 / 5 題</h2>
-                    <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Finding Pairs...</p>
+                    <h2 id="round-indicator" class="text-2xl font-black text-gray-800">第 1 / 10 題</h2>
                 </div>
             </div>
             
             <div class="flex-1 max-w-md w-full">
                 <div class="w-full h-4 bg-gray-100 rounded-full overflow-hidden p-1">
-                    <div id="progress-fill" class="progress-bar-fill h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full w-full"></div>
+                    <div id="progress-fill" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full w-full"></div>
                 </div>
             </div>
 
             <div class="text-right">
-                <div id="timer-text" class="text-4xl font-black font-mono text-indigo-600 leading-none">10.0s</div>
+                <div id="timer-text" class="text-4xl font-black font-mono text-indigo-600 leading-none">30.0s</div>
             </div>
         </div>
 
-        <div id="grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 w-full content-start px-2"></div>
+        <div id="grid" class="grid gap-3 w-full place-content-center pb-24"></div>
 
-        <button id="abort-btn" class="mt-10 px-10 py-3 bg-white/20 hover:bg-white/30 text-white font-black rounded-full transition-all backdrop-blur-md border border-white/20">
+        <button id="abort-btn" class="fixed bottom-6 px-10 py-3 bg-white/40 hover:bg-white/60 text-indigo-900 font-black rounded-full transition-all backdrop-blur-md border border-white/20 active:scale-95 shadow-xl">
             中止挑戰
         </button>
     </div>
 
     <!-- 結算畫面 -->
-    <div id="result-screen" class="hidden glass-panel p-12 rounded-[3rem] max-w-md w-full text-center z-10">
-        <div id="result-icon" class="text-8xl mb-6 scale-110 drop-shadow-xl">🏆</div>
+    <div id="result-screen" class="hidden glass-panel p-10 rounded-[3rem] max-w-md w-full text-center z-10">
+        <div id="result-icon" class="text-8xl mb-6">🏆</div>
         <h2 id="result-title" class="text-4xl font-black text-gray-800 mb-8">挑戰結束！</h2>
         
         <div class="space-y-4 mb-10">
             <div class="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-50">
                 <span class="text-gray-400 font-bold uppercase text-xs tracking-widest">答對題數</span>
-                <span id="stat-correct" class="text-2xl font-black text-indigo-600">5 / 5</span>
-            </div>
-            <div class="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-50">
-                <span class="text-gray-400 font-bold uppercase text-xs tracking-widest">平均用時</span>
-                <span id="stat-avg-time" class="text-2xl font-black text-indigo-600">2.45s</span>
+                <span id="stat-correct" class="text-2xl font-black text-indigo-600">10 / 10</span>
             </div>
             <div class="flex justify-between items-center bg-indigo-600 p-6 rounded-2xl shadow-xl shadow-indigo-100">
                 <span class="text-indigo-100 font-bold uppercase text-xs tracking-widest">總耗時</span>
-                <span id="stat-total-time" class="text-2xl font-black text-white">12.3s</span>
+                <span id="stat-total-time" class="text-2xl font-black text-white">25.3s</span>
             </div>
         </div>
         
-        <button id="retry-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black py-5 rounded-2xl text-xl shadow-xl active:scale-95 mb-6">
-            再次挑戰
-        </button>
-
-        <div class="pt-6 border-t border-gray-100">
-            <a href="https://www.facebook.com/kevin.pptgame" target="_blank" class="designer-link text-gray-400 font-bold text-sm">
-                設計：簡報遊戲設計師 - 鄭凱文
-            </a>
-            <p class="mt-4 text-[10px] text-gray-300 font-bold uppercase tracking-[0.2em]">Game Designer Portfolio</p>
+        <div class="grid grid-cols-1 gap-4">
+            <button id="retry-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black py-5 rounded-2xl text-xl shadow-xl active:scale-95">再次挑戰</button>
+            <button id="back-btn" class="w-full bg-gray-50 text-gray-400 font-black py-4 rounded-2xl active:scale-95 hover:bg-gray-100">返回主畫面</button>
         </div>
     </div>
 
     <script>
-        // --- 核心邏輯保持一致 ---
+        // --- 核心邏輯 ---
         let state = {
-            config: { totalRounds: 5, itemCount: 30, minNum: 1, maxNum: 500, timeLimit: 10 },
-            current: { round: 0, correctCount: 0, roundTimes: [], remainingTime: 0, targetPair: null, selectedId: null, isGameOver: false, timerInterval: null }
+            config: { totalRounds: 10, itemCount: 10, minNum: 1, maxNum: 30, timeLimit: 30 },
+            current: { round: 0, correctCount: 0, roundTimes: [], remainingTime: 0, targetPair: null, selectedId: null, isGameOver: false, timerInterval: null },
+            history: JSON.parse(localStorage.getItem('num_match_history') || '[]')
         };
 
         const elements = {
-            totalRounds: document.getElementById('total-rounds'),
-            totalRoundsDisp: document.getElementById('total-rounds-display'),
-            itemCount: document.getElementById('item-count'),
-            itemCountDisp: document.getElementById('count-display'),
+            totalRoundsSld: document.getElementById('total-rounds-slider'),
+            totalRoundsInp: document.getElementById('total-rounds-input'),
+            itemCountSld: document.getElementById('item-count-slider'),
+            itemCountInp: document.getElementById('item-count-input'),
             minRange: document.getElementById('min-range'),
             maxRange: document.getElementById('max-range'),
             gameTime: document.getElementById('game-time'),
@@ -241,18 +271,37 @@
             roundNum: document.getElementById('round-num'),
             rangeError: document.getElementById('range-error'),
             statCorrect: document.getElementById('stat-correct'),
-            statAvgTime: document.getElementById('stat-avg-time'),
             statTotalTime: document.getElementById('stat-total-time'),
             resultIcon: document.getElementById('result-icon'),
-            resultTitle: document.getElementById('result-title')
+            resultTitle: document.getElementById('result-title'),
+            historyModal: document.getElementById('history-modal'),
+            historyList: document.getElementById('history-list'),
+            abortModal: document.getElementById('abort-modal')
         };
 
         const screens = { setup: document.getElementById('setup-screen'), game: document.getElementById('game-screen'), result: document.getElementById('result-screen') };
 
-        // 參數監聽
-        elements.totalRounds.oninput = (e) => { state.config.totalRounds = parseInt(e.target.value); elements.totalRoundsDisp.innerText = state.config.totalRounds; };
-        elements.itemCount.oninput = (e) => { state.config.itemCount = parseInt(e.target.value); elements.itemCountDisp.innerText = state.config.itemCount; validateRange(); };
-        elements.gameTime.oninput = (e) => { state.config.timeLimit = parseInt(e.target.value); elements.gameTimeDisp.innerText = state.config.timeLimit + "s"; };
+        // 參數雙向綁定
+        function syncInputs(slider, input, key) {
+            slider.oninput = (e) => {
+                input.value = e.target.value;
+                state.config[key] = parseInt(e.target.value);
+                validateRange();
+            };
+            input.oninput = (e) => {
+                let val = parseInt(e.target.value);
+                if (isNaN(val)) return;
+                val = Math.max(slider.min, Math.min(slider.max, val));
+                slider.value = val;
+                state.config[key] = val;
+                validateRange();
+            };
+        }
+
+        syncInputs(elements.totalRoundsSld, elements.totalRoundsInp, 'totalRounds');
+        syncInputs(elements.itemCountSld, elements.itemCountInp, 'itemCount');
+
+        elements.gameTime.oninput = (e) => { state.config.timeLimit = parseInt(e.target.value); elements.gameTimeDisp.innerText = e.target.value + "s"; };
         elements.minRange.onchange = validateRange;
         elements.maxRange.onchange = validateRange;
 
@@ -267,8 +316,42 @@
             return isValid;
         }
 
-        function showScreen(key) { Object.keys(screens).forEach(k => screens[k].classList.toggle('hidden', k !== key)); }
+        function showScreen(key) { 
+            Object.keys(screens).forEach(k => screens[k].classList.toggle('hidden', k !== key));
+            window.scrollTo(0, 0); 
+        }
 
+        // 歷史紀錄
+        function saveToHistory(record) {
+            state.history.unshift(record);
+            state.history = state.history.slice(0, 15);
+            localStorage.setItem('num_match_history', JSON.stringify(state.history));
+        }
+
+        function renderHistory() {
+            elements.historyList.innerHTML = state.history.length === 0 ? '<div class="text-center py-10 text-gray-400 font-bold">目前尚無紀錄</div>' : '';
+            state.history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'bg-white/60 p-4 rounded-2xl flex justify-between items-center shadow-sm border border-white/50';
+                div.innerHTML = `<div><div class="text-xs font-black text-gray-400">${item.date}</div><div class="font-black text-gray-700">答對 ${item.score}/${item.total}</div></div><div class="text-right"><div class="text-[10px] font-black text-indigo-400 uppercase">AVG Time</div><div class="font-black text-indigo-600">${item.avgTime}s</div></div>`;
+                elements.historyList.appendChild(div);
+            });
+        }
+
+        document.getElementById('view-history-btn').onclick = () => { renderHistory(); elements.historyModal.classList.remove('hidden'); };
+        document.getElementById('close-history-btn').onclick = () => elements.historyModal.classList.add('hidden');
+        document.getElementById('clear-history-btn').onclick = () => { if(state.history.length > 0) { state.history = []; localStorage.removeItem('num_match_history'); renderHistory(); } };
+
+        // 中止挑戰
+        document.getElementById('abort-btn').onclick = () => { elements.abortModal.classList.remove('hidden'); };
+        document.getElementById('cancel-abort-btn').onclick = () => { elements.abortModal.classList.add('hidden'); };
+        document.getElementById('confirm-abort-btn').onclick = () => {
+            clearInterval(state.current.timerInterval);
+            elements.abortModal.classList.add('hidden');
+            showScreen('setup');
+        };
+
+        // 遊戲運行
         function startSession() {
             state.current.correctCount = 0; state.current.roundTimes = []; state.current.round = 0;
             showScreen('game'); nextRound();
@@ -286,12 +369,42 @@
 
         function setupGrid() {
             elements.grid.innerHTML = '';
+            const count = state.config.itemCount;
+            
+            // --- 動態規格計算邏輯 ---
+            let colsClass, fontSizeClass, paddingClass;
+
+            if (count <= 12) {
+                // 數量少：大卡片，每列 2-3 個
+                colsClass = 'grid-cols-2 sm:grid-cols-3';
+                fontSizeClass = 'text-4xl sm:text-5xl';
+                paddingClass = 'py-8 sm:py-10';
+            } else if (count <= 30) {
+                // 數量中等：中卡片，每列 4-5 個
+                colsClass = 'grid-cols-3 sm:grid-cols-5';
+                fontSizeClass = 'text-3xl sm:text-4xl';
+                paddingClass = 'py-6 sm:py-8';
+            } else if (count <= 60) {
+                // 數量多：小卡片，每列 6-8 個
+                colsClass = 'grid-cols-4 sm:grid-cols-8';
+                fontSizeClass = 'text-2xl sm:text-3xl';
+                paddingClass = 'py-4 sm:py-6';
+            } else {
+                // 數量極多：極小卡片，每列 10 個
+                colsClass = 'grid-cols-5 sm:grid-cols-10';
+                fontSizeClass = 'text-xl sm:text-2xl';
+                paddingClass = 'py-2 sm:py-4';
+            }
+
+            elements.grid.className = `grid ${colsClass} gap-3 w-full place-content-center pb-12`;
+            // ------------------------
+
             const rangeSize = state.config.maxNum - state.config.minNum + 1;
             const targetNum = Math.floor(Math.random() * rangeSize) + state.config.minNum;
             state.current.targetPair = targetNum;
 
             const pool = new Set([targetNum]);
-            while (pool.size < state.config.itemCount - 1) pool.add(Math.floor(Math.random() * rangeSize) + state.config.minNum);
+            while (pool.size < count - 1) pool.add(Math.floor(Math.random() * rangeSize) + state.config.minNum);
             
             const gameNumbers = Array.from(pool);
             gameNumbers.push(targetNum);
@@ -299,7 +412,7 @@
 
             gameNumbers.forEach((num, index) => {
                 const card = document.createElement('div');
-                card.className = 'number-card bg-white border-2 border-gray-50 rounded-2xl py-5 flex items-center justify-center text-xl font-black text-gray-700 cursor-pointer shadow-sm';
+                card.className = `number-card bg-white border-2 border-gray-100 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center font-black text-gray-700 cursor-pointer shadow-sm ${fontSizeClass} ${paddingClass}`;
                 card.innerText = num;
                 card.dataset.value = num;
                 card.dataset.index = index;
@@ -338,33 +451,23 @@
             if (state.current.timerInterval) clearInterval(state.current.timerInterval);
             const start = Date.now();
             const end = start + (state.config.timeLimit * 1000);
-
             state.current.timerInterval = setInterval(() => {
-                const now = Date.now();
-                const diff = Math.max(0, (end - now) / 1000);
+                const diff = Math.max(0, (end - Date.now()) / 1000);
                 state.current.remainingTime = diff;
-                
-                const percentage = (diff / state.config.timeLimit) * 100;
-                elements.progress.style.width = `${percentage}%`;
+                elements.progress.style.width = `${(diff / state.config.timeLimit) * 100}%`;
                 elements.timerText.innerText = `${diff.toFixed(1)}s`;
-
-                if (diff <= 0) {
-                    state.current.roundTimes.push(state.config.timeLimit);
-                    finishRound(false);
-                }
+                if (diff <= 0) { state.current.roundTimes.push(state.config.timeLimit); finishRound(false); }
             }, 50);
         }
 
         function finishRound(success) {
             state.current.isGameOver = true;
             clearInterval(state.current.timerInterval);
-
             if (!success) {
                 document.querySelectorAll('.number-card').forEach(c => {
-                    if (parseInt(c.dataset.value) === state.current.targetPair) c.classList.add('ring-4', 'ring-green-500', 'ring-offset-2', 'z-20');
+                    if (parseInt(c.dataset.value) === state.current.targetPair) c.classList.add('ring-4', 'ring-green-400', 'z-20');
                 });
             }
-
             setTimeout(() => {
                 if (state.current.round < state.config.totalRounds) nextRound();
                 else showFinalResult();
@@ -376,18 +479,18 @@
             const total = state.current.roundTimes.reduce((a, b) => a + b, 0);
             const avg = total / state.config.totalRounds;
             elements.statCorrect.innerText = `${state.current.correctCount} / ${state.config.totalRounds}`;
-            elements.statAvgTime.innerText = `${avg.toFixed(2)}s`;
             elements.statTotalTime.innerText = `${total.toFixed(1)}s`;
-
-            const rate = state.current.correctCount / state.config.totalRounds;
-            if (rate === 1) { elements.resultIcon.innerText = "🏆"; elements.resultTitle.innerText = "完美的勝利！"; }
-            else if (rate >= 0.6) { elements.resultIcon.innerText = "🌟"; elements.resultTitle.innerText = "表現很棒！"; }
-            else { elements.resultIcon.innerText = "💪"; elements.resultTitle.innerText = "繼續努力！"; }
+            const now = new Date();
+            saveToHistory({
+                date: `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`,
+                score: state.current.correctCount, total: state.config.totalRounds, avgTime: avg.toFixed(2)
+            });
         }
 
         document.getElementById('start-btn').onclick = startSession;
         document.getElementById('retry-btn').onclick = startSession;
-        document.getElementById('abort-btn').onclick = () => { clearInterval(state.current.timerInterval); showScreen('setup'); };
+        document.getElementById('back-btn').onclick = () => showScreen('setup');
+        validateRange();
     </script>
 </body>
 </html>
